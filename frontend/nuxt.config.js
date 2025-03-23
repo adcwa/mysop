@@ -1,25 +1,71 @@
-export default defineNuxtConfig({
-  ssr: false,
-  modules: [
-    '@nuxtjs/tailwindcss',
-    '@pinia/nuxt',
-  ],
-  app: {
-    head: {
-      title: 'MidScense Scene Manager',
-      meta: [
-        { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: 'Scene-based management service using MidScense' }
-      ]
-    }
+export default {
+  // Target: https://go.nuxtjs.dev/config-target
+  target: 'static',
+
+  // Global page headers: https://go.nuxtjs.dev/config-head
+  head: {
+    title: 'MySOP - 场景编排平台',
+    htmlAttrs: {
+      lang: 'zh-CN'
+    },
+    meta: [
+      { charset: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { hid: 'description', name: 'description', content: '基于MidScense的场景编排平台，用于管理和执行YAML场景' },
+      { name: 'format-detection', content: 'telephone=no' }
+    ],
+    link: [
+      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+    ]
   },
-  runtimeConfig: {
-    public: {
-      apiBase: process.env.API_BASE || 'http://localhost:3001/api'
-    }
-  },
+
+  // Global CSS: https://go.nuxtjs.dev/config-css
   css: [
-    '~/assets/css/main.css'
-  ]
-}) 
+    '@/assets/css/tailwind.css',
+  ],
+
+  // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
+  plugins: [
+  ],
+
+  // Auto import components: https://go.nuxtjs.dev/config-components
+  components: true,
+
+  // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
+  buildModules: [
+    // https://go.nuxtjs.dev/tailwindcss
+    '@nuxtjs/tailwindcss',
+  ],
+
+  // Modules: https://go.nuxtjs.dev/config-modules
+  modules: [
+    // https://go.nuxtjs.dev/axios
+    '@nuxtjs/axios',
+  ],
+
+  // Axios module configuration: https://go.nuxtjs.dev/config-axios
+  axios: {
+    baseURL: process.env.API_BASE_URL || 'http://localhost:3000/api',
+  },
+
+  // Public runtime config
+  publicRuntimeConfig: {
+    apiBase: process.env.API_BASE_URL || 'http://localhost:3000/api'
+  },
+
+  // Build Configuration: https://go.nuxtjs.dev/config-build
+  build: {
+    postcss: {
+      plugins: {
+        tailwindcss: {},
+        autoprefixer: {},
+      },
+    },
+  },
+  
+  // Server configuration
+  server: {
+    port: process.env.PORT || 8000,
+    host: process.env.HOST || 'localhost'
+  }
+} 

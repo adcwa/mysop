@@ -13,6 +13,11 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id'
       }
     },
+    sceneType: {
+      type: DataTypes.ENUM('json', 'yaml'),
+      defaultValue: 'json',
+      allowNull: false
+    },
     status: {
       type: DataTypes.ENUM('running', 'completed', 'failed'),
       defaultValue: 'running'
@@ -38,8 +43,22 @@ module.exports = (sequelize, DataTypes) => {
   SceneInstance.associate = function(models) {
     SceneInstance.belongsTo(models.Scene, {
       foreignKey: 'sceneId',
-      as: 'scene'
+      as: 'scene',
+      constraints: false,
+      scope: {
+        sceneType: 'json'
+      }
     });
+    
+    SceneInstance.belongsTo(models.YamlScene, {
+      foreignKey: 'sceneId',
+      as: 'yamlScene',
+      constraints: false,
+      scope: {
+        sceneType: 'yaml'
+      }
+    });
+    
     SceneInstance.hasMany(models.SceneInstanceStep, {
       foreignKey: 'instanceId',
       as: 'steps'

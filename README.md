@@ -1,102 +1,110 @@
-# MidScense Scene Manager
+# MySOP - 场景编排平台
 
-A complete scene-based management service using MidScense library for creating, managing, and running 3D scenes.
+基于MidScense引擎的场景编排平台，支持YAML场景的创建、管理和执行。
 
-## Features
+## 功能特性
 
-- Create and manage 3D scenes with complex attributes
-- Run scenes and track execution status
-- View detailed execution steps and results
-- Modern UI with real-time updates
+- 使用YAML定义场景流程
+- 创建、编辑、查看和删除场景
+- 一键执行场景并查看结果
+- 记录执行历史和详细日志
 
-## Tech Stack
+## 技术栈
 
-- **Frontend**: Nuxt.js 3, Vue 3, Tailwind CSS
-- **Backend**: Node.js, Express
-- **Database**: PostgreSQL
-- **Libraries**: MidScense.js
+### 后端
+- Node.js
+- Express
+- PostgreSQL
+- MidScense场景引擎
 
-## Prerequisites
+### 前端
+- Vue.js 2.x
+- Nuxt.js
+- Tailwind CSS
+- Axios
 
-- Node.js >= 16.0.0
-- PNPM >= 7.0.0
-- PostgreSQL >= 14.0
+## 快速开始
 
-## Installation
+### 前提条件
+- Node.js 14+
+- PostgreSQL 12+
+- npm 或 yarn
 
-1. Clone the repository:
+### 安装步骤
 
+1. 克隆仓库
 ```bash
-git clone <repository-url>
+git clone https://github.com/yourusername/mysop.git
 cd mysop
 ```
 
-2. Install dependencies:
-
+2. 安装依赖
 ```bash
-pnpm install
+# 安装后端依赖
+cd backend
+npm install
+
+# 安装前端依赖
+cd ../frontend
+npm install
 ```
 
-3. Configure the database:
+3. 配置环境变量
+创建`.env`文件在backend目录，添加以下配置：
+```
+DB_USER=postgres
+DB_HOST=localhost
+DB_NAME=mysop
+DB_PASSWORD=your_password
+DB_PORT=5432
+PORT=3000
+```
 
-The default configuration expects a PostgreSQL database with:
-- Host: localhost
-- Port: 5432
-- Database name: mysop
-- Username: admin
-- Password: Admin123
-
-You can modify these settings in `backend/.env` if needed.
-
-4. Initialize the database:
-
+4. 初始化数据库
 ```bash
-pnpm -F backend migrate
+cd backend
+npm run init-db
 ```
 
-## Running the Application
-
-Start the development server:
-
+5. 启动应用
 ```bash
-pnpm dev
+# 启动后端
+cd backend
+npm run dev
+
+# 启动前端（新终端）
+cd frontend
+npm run dev
 ```
 
-This will start both the frontend and backend servers:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:3001
+6. 打开浏览器，访问 http://localhost:8000
 
-## Building for Production
+## YAML场景示例
 
-```bash
-pnpm build
+```yaml
+name: 简单示例场景
+description: 演示基本场景执行流程
+
+steps:
+  - id: step1
+    name: 初始化
+    type: initialize
+    data:
+      message: 开始执行场景
+      
+  - id: step2
+    name: 处理数据
+    type: transform
+    data:
+      input: $ref:step1.result
+      transform: uppercase
+      
+  - id: step3
+    name: 完成
+    type: notification
+    message: 场景执行完成
 ```
 
-To start the production server:
-
-```bash
-pnpm start
-```
-
-## Project Structure
-
-```
-mysop/
-├── backend/           # Node.js Express backend
-│   ├── src/
-│   │   ├── controllers/  # API controllers
-│   │   ├── db/           # Database models and migrations
-│   │   ├── routes/       # API routes
-│   │   └── index.js      # Main server file
-├── frontend/          # Nuxt.js frontend
-│   ├── assets/        # Static assets
-│   ├── components/    # Vue components
-│   ├── layouts/       # Page layouts
-│   ├── pages/         # Application pages
-│   └── nuxt.config.js # Nuxt.js configuration
-└── package.json      # Project configuration
-```
-
-## License
+## 许可证
 
 MIT License

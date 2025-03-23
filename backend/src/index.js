@@ -1,22 +1,40 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const bodyParser = require('body-parser');
+const morgan = require('morgan');
+const { Pool } = require('pg');
 const { sequelize } = require('./db/models');
 const routes = require('./routes');
-require('dotenv').config();
 
+// 初始化数据库连接池
+const pool = new Pool({
+  user: process.env.DB_USER || 'postgres',
+  host: process.env.DB_HOST || 'localhost',
+  database: process.env.DB_NAME || 'mysop',
+  password: process.env.DB_PASSWORD || 'postgres',
+  port: process.env.DB_PORT || 5432,
+});
+
+// 初始化Express应用
 const app = express();
-const PORT = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
+app.use(morgan('dev'));
 
 // API routes
-app.use('/api', routes);
+const scenesRouter = require('./routes/scenes');
+const executionsRouter = require('./routes/executions');
+
+app.use('/api/scenes', scenesRouter(pool));
+app.use('/api/executions', executionsRouter(pool));
 
 // Health check
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'UP', message: 'Server is running' });
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Service is running' });
 });
 
 // Default route
@@ -28,8 +46,8 @@ app.get('/', (req, res) => {
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
-    message: 'Something went wrong!',
-    error: process.env.NODE_ENV === 'production' ? {} : err
+    error: true,
+    message: err.message || 'Internal Server Error'
   });
 });
 
@@ -41,8 +59,9 @@ async function startServer() {
     console.log('Database connection has been established successfully.');
     
     // Start server
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+    app.listen(port, () => {
+      console.log(`MySOP服务器已启动，端口：${port}`);
+      console.log(`访问 http://localhost:${port}/api/health 检查服务状态`);
     });
   } catch (error) {
     console.error('Unable to connect to the database:', error);
@@ -50,4 +69,6 @@ async function startServer() {
   }
 }
 
-startServer(); 
+startServer();
+
+module.exports = app; 
