@@ -1,0 +1,19 @@
+{
+  "name": "mysop",
+  "version": "1.0.0",
+  "description": "Scene-based management service using MidScense",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "pnpm -r dev",
+    "build": "pnpm -r build",
+    "start": "pnpm -r start"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "pnpm": ">=7.0.0"
+  }
+} 
