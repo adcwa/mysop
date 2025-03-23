@@ -22,7 +22,7 @@
           </nav>
         </div>
         <div class="flex items-center">
-          <button type="button" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md text-sm font-medium">
+          <button type="button" @click="$router.push('/scenes/create')" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md text-sm font-medium">
             创建场景
           </button>
         </div>

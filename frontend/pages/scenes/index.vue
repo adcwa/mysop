@@ -7,7 +7,7 @@
           <p class="mt-1 text-sm text-gray-500">管理所有YAML场景定义</p>
         </div>
         <div class="ml-4 mt-2 flex-shrink-0">
-          <button type="button" class="relative inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+          <button type="button" @click="$router.push('/scenes/create')" class="relative inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
             创建场景
           </button>
         </div>
@@ -80,7 +80,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </button>
-              <button class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-primary shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+              <button @click="runScene(scene)" class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-primary shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                 执行
               </button>
             </div>
@@ -96,7 +96,7 @@
         <h3 class="mt-2 text-sm font-medium text-gray-900">没有场景</h3>
         <p class="mt-1 text-sm text-gray-500">开始创建您的第一个场景</p>
         <div class="mt-6">
-          <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+          <button type="button" @click="$router.push('/scenes/create')" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
             <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
             </svg>
@@ -157,53 +157,46 @@ export default {
   name: 'ScenesListPage',
   data() {
     return {
-      scenes: []
+      scenes: [],
+      loading: false
     }
   },
-  created() {
-    // 模拟数据
-    this.scenes = [
-      {
-        id: 1,
-        name: '数据导入场景',
-        description: '从CSV文件导入数据并进行处理',
-        type: '数据处理',
-        updated_at: '2023-06-15T14:30:00Z'
-      },
-      {
-        id: 2,
-        name: '数据清洗流程',
-        description: '对原始数据进行清洗和转换',
-        type: '数据处理',
-        updated_at: '2023-06-14T10:15:00Z'
-      },
-      {
-        id: 3,
-        name: '定时备份流程',
-        description: '每日定时将数据备份到S3存储',
-        type: '集成',
-        updated_at: '2023-06-10T16:45:00Z'
-      },
-      {
-        id: 4,
-        name: '异常通知流程',
-        description: '监控数据并在异常时发送通知',
-        type: '通知',
-        updated_at: '2023-06-05T09:20:00Z'
-      },
-      {
-        id: 5,
-        name: '月度报表生成',
-        description: '自动生成和发送月度统计报表',
-        type: '数据处理',
-        updated_at: '2023-05-28T11:10:00Z'
-      }
-    ];
+  async fetch() {
+    try {
+      // 从API获取场景列表
+      const response = await this.$axios.$get('/api/scenes');
+      this.scenes = response;
+    } catch (error) {
+      console.error('获取场景列表失败', error);
+      alert('获取场景列表失败: ' + (error.response?.data?.message || error.message || '未知错误'));
+    }
   },
   methods: {
     formatDate(dateString) {
       const date = new Date(dateString);
       return date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    },
+    async runScene(scene) {
+      if (!confirm(`确定要执行场景 "${scene.name}" 吗？`)) {
+        return;
+      }
+      
+      this.loading = true;
+      
+      try {
+        // 调用API执行场景
+        const response = await this.$axios.$post(`/api/scenes/${scene.id}/run`);
+        
+        this.loading = false;
+        alert(`场景 "${scene.name}" 已开始执行，执行ID: ${response.id}`);
+        
+        // 跳转到执行历史页面
+        this.$router.push('/executions');
+      } catch (error) {
+        this.loading = false;
+        console.error('执行场景失败', error);
+        alert('执行场景失败: ' + (error.response?.data?.message || error.message || '未知错误'));
+      }
     }
   }
 }

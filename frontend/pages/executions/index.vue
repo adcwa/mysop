@@ -107,7 +107,7 @@
         <h3 class="mt-2 text-sm font-medium text-gray-900">没有执行记录</h3>
         <p class="mt-1 text-sm text-gray-500">当场景被执行后，记录将显示在这里</p>
         <div class="mt-6">
-          <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+          <button type="button" @click="$router.push('/scenes')" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
             返回场景列表
           </button>
         </div>

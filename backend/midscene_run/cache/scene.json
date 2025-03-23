@@ -1,0 +1,63 @@
+{
+  "pkgName": "mysop-backend",
+  "pkgVersion": "1.0.0",
+  "cacheId": "scene",
+  "aiTasks": [
+    {
+      "prompt": "search for 'weather today'",
+      "tasks": [
+        {
+          "type": "plan",
+          "pageContext": {
+            "url": "https://cn.bing.com/",
+            "size": {
+              "width": 1440,
+              "height": 768,
+              "dpr": 2
+            }
+          },
+          "prompt": "search for 'weather today' @ ",
+          "response": {
+            "actions": [
+              {
+                "type": "Input",
+                "thought": "Input 'weather today' into the search box.",
+                "param": {
+                  "value": "weather today"
+                },
+                "locate": {
+                  "id": "leico",
+                  "prompt": "The search box"
+                }
+              },
+              {
+                "type": "Tap",
+                "thought": "Click the search button to search for 'weather today'.",
+                "param": null,
+                "locate": {
+                  "id": "ainlo",
+                  "prompt": "The search button"
+                }
+              }
+            ],
+            "error": null,
+            "more_actions_needed_by_instruction": false,
+            "log": "Input 'weather today' into the search box. Click the search button to search for 'weather today'.",
+            "rawResponse": "{\n  \"actions\": [\n    {\n      \"type\": \"Input\",\n      \"thought\": \"Input 'weather today' into the search box.\",\n      \"param\": {\n        \"value\": \"weather today\"\n      },\n      \"locate\": {\n        \"id\": \"leico\",\n        \"prompt\": \"The search box\"\n      }\n    },\n    {\n      \"type\": \"Tap\",\n      \"thought\": \"Click the search button to search for 'weather today'.\",\n      \"param\": null,\n      \"locate\": {\n        \"id\": \"ainlo\",\n        \"prompt\": \"The search button\"\n      }\n    }\n  ],\n  \"error\": null,\n  \"more_actions_needed_by_instruction\": false,\n  \"log\": \"Input 'weather today' into the search box. Click the search button to search for 'weather today'.\"\n}",
+            "usage": {
+              "completion_tokens": 194,
+              "prompt_tokens": 6238,
+              "total_tokens": 6432,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

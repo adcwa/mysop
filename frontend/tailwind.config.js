@@ -3,9 +3,9 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#3B82F6', // blue-500
-          dark: '#2563EB',    // blue-600
-          light: '#60A5FA',   // blue-400
+          DEFAULT: '#3366CC',
+          dark: '#2856AD',
+          light: '#4F87DE',
         },
       },
     },

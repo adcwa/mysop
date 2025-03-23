@@ -11,7 +11,7 @@ export default {
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: '基于MidScense的场景编排平台，用于管理和执行YAML场景' },
+      { hid: 'description', name: 'description', content: '基于MidScense引擎构建的YAML场景管理工具' },
       { name: 'format-detection', content: 'telephone=no' }
     ],
     link: [
@@ -45,7 +45,7 @@ export default {
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    baseURL: process.env.API_BASE_URL || 'http://localhost:3000/api',
+    baseURL: process.env.API_URL || 'http://localhost:3000',
   },
 
   // Public runtime config
@@ -65,7 +65,28 @@ export default {
   
   // Server configuration
   server: {
-    port: process.env.PORT || 8000,
+    port: process.env.PORT || 3030,
     host: process.env.HOST || 'localhost'
+  },
+
+  // Define primary color CSS variables for TailwindCSS
+  tailwindcss: {
+    config: {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              light: '#4F87DE',
+              DEFAULT: '#3366CC',
+              dark: '#2856AD'
+            }
+          }
+        }
+      },
+      plugins: [
+        require('@tailwindcss/forms'),
+        require('@tailwindcss/typography')
+      ]
+    }
   }
 } 

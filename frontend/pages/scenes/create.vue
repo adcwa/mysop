@@ -40,6 +40,7 @@
             <div>
               <label for="type" class="block text-sm font-medium text-gray-700">场景类型</label>
               <select id="type" name="type" v-model="scene.type" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md">
+                <option value="yaml">YAML</option>
                 <option value="data-process">数据处理</option>
                 <option value="notification">通知</option>
                 <option value="integration">集成</option>
@@ -66,9 +67,15 @@
           <div>
             <div class="flex justify-between items-center mb-2">
               <label for="yaml" class="block text-sm font-medium text-gray-700">YAML内容</label>
-              <div>
+              <div class="space-x-2">
                 <button type="button" @click="loadTemplate" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                   加载模板
+                </button>
+                <button type="button" @click="validateYaml" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                  验证YAML
+                </button>
+                <button type="button" @click="testRun" class="inline-flex items-center px-2.5 py-1.5 border border-transparent shadow-sm text-xs font-medium rounded text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                  测试运行
                 </button>
               </div>
             </div>
@@ -78,17 +85,33 @@
             </div>
             
             <div class="mt-4">
-              <div class="flex items-start">
-                <div class="flex-shrink-0">
-                  <button @click="validateYaml" type="button" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                    验证YAML
-                  </button>
+              <div v-if="validationResult" class="rounded-md p-4" :class="validationResult.valid ? 'bg-green-50' : 'bg-red-50'">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg v-if="validationResult.valid" class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium" :class="validationResult.valid ? 'text-green-800' : 'text-red-800'">
+                      {{ validationResult.message }}
+                    </h3>
+                    <div v-if="!validationResult.valid" class="mt-2 text-sm text-red-700">
+                      <p>{{ validationResult.error }}</p>
+                    </div>
+                  </div>
                 </div>
-                <div class="ml-3 text-sm" v-if="validationResult">
-                  <p :class="validationResult.valid ? 'text-green-600' : 'text-red-600'">
-                    {{ validationResult.message }}
-                  </p>
-                </div>
+              </div>
+            </div>
+            
+            <!-- 测试运行结果 -->
+            <div v-if="runResult" class="mt-4">
+              <h4 class="text-sm font-medium text-gray-700 mb-2">执行结果:</h4>
+              <div class="bg-gray-50 rounded-md border border-gray-300 p-4 overflow-auto h-64">
+                <pre class="text-xs">{{ JSON.stringify(runResult, null, 2) }}</pre>
               </div>
             </div>
           </div>
@@ -105,10 +128,20 @@
         保存场景
       </button>
     </div>
+    
+    <!-- 加载中遮罩 -->
+    <div v-if="loading" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+      <div class="bg-white p-6 rounded-lg shadow-xl">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        <p class="mt-4 text-center text-gray-700">{{ loadingMessage }}</p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+import yaml from 'js-yaml';
+
 export default {
   name: 'CreateScenePage',
   data() {
@@ -116,15 +149,18 @@ export default {
       scene: {
         name: '',
         description: '',
-        type: 'data-process',
+        type: 'yaml',
         tags: '',
         yaml: ''
       },
-      validationResult: null
+      validationResult: null,
+      runResult: null,
+      loading: false,
+      loadingMessage: '处理中...'
     }
   },
   methods: {
-    saveScene() {
+    async saveScene() {
       // 验证表单
       if (!this.scene.name.trim()) {
         alert('场景名称不能为空');
@@ -136,13 +172,38 @@ export default {
         return;
       }
       
-      // 保存场景逻辑，实际项目中应该调用API
-      console.log('保存场景', this.scene);
+      // 验证YAML格式
+      try {
+        yaml.load(this.scene.yaml);
+      } catch (error) {
+        if (!confirm('YAML格式可能有误，是否继续保存？')) {
+          return;
+        }
+      }
       
-      // 模拟保存成功
-      alert('场景保存成功');
-      this.$router.push('/scenes');
+      this.loading = true;
+      this.loadingMessage = '保存场景中...';
+      
+      try {
+        // 调用API保存场景
+        const response = await this.$axios.$post('/api/scenes', {
+          name: this.scene.name,
+          description: this.scene.description,
+          type: this.scene.type,
+          tags: this.scene.tags,
+          yaml_content: this.scene.yaml
+        });
+        
+        this.loading = false;
+        alert('场景保存成功');
+        this.$router.push('/scenes');
+      } catch (error) {
+        this.loading = false;
+        console.error('保存场景失败', error);
+        alert('保存场景失败: ' + (error.response?.data?.message || error.message || '未知错误'));
+      }
     },
+    
     loadTemplate() {
       // 加载模板YAML
       this.scene.yaml = `name: 示例场景
@@ -168,10 +229,11 @@ steps:
     data:
       message: 场景执行完成`;
     },
+    
     validateYaml() {
       try {
-        // 实际项目中应该调用API或使用库进行验证
-        // 这里简单模拟验证成功
+        // 验证YAML格式
+        yaml.load(this.scene.yaml);
         this.validationResult = {
           valid: true,
           message: 'YAML格式有效'
@@ -179,8 +241,38 @@ steps:
       } catch (error) {
         this.validationResult = {
           valid: false,
-          message: `YAML格式无效: ${error.message}`
+          message: 'YAML格式无效',
+          error: error.message
         };
+      }
+    },
+    
+    async testRun() {
+      // 首先验证YAML
+      this.validateYaml();
+      if (this.validationResult && !this.validationResult.valid) {
+        return;
+      }
+      
+      this.loading = true;
+      this.loadingMessage = '测试执行中...';
+      
+      try {
+        // 使用后端的测试运行接口
+        const result = await this.$axios.$post('/api/scenes/test-run', {
+          yaml_content: this.scene.yaml,
+          params: {}
+        });
+        
+        this.runResult = result;
+        this.loading = false;
+      } catch (error) {
+        this.loading = false;
+        this.runResult = {
+          error: true,
+          message: error.response?.data?.message || error.message || '执行失败'
+        };
+        console.error('执行YAML失败', error);
       }
     }
   }

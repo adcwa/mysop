@@ -8,5 +8,3 @@
 后端使用nodejs，postgresql
 
 
-
-场景应该是
