@@ -11,7 +11,7 @@
   "dependencies": {
     "@midscene/web": "^0.4.0",
     "@nuxtjs/axios": "^5.13.6",
-    "axios": "^1.7.7",
+    "axios": "^0.27.2",
     "core-js": "^3.19.3",
     "defu": "^6.0.0",
     "js-yaml": "^4.1.0",
